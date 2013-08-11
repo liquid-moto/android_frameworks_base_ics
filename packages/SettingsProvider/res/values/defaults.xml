@@ -18,8 +18,8 @@
 -->
 <resources>
     <bool name="def_dim_screen">true</bool>
-    <!-- 1000ms * 60sec * 5min = 300000ms -->
-    <integer name="def_screen_off_timeout">300000</integer>
+    <!-- 1000ms * 30sec = 30000ms -->
+    <integer name="def_screen_off_timeout">30000</integer>
     <bool name="def_airplane_mode_on">false</bool>
     <!-- Comma-separated list of bluetooth, wifi, and cell. -->
     <string name="def_airplane_mode_radios" translatable="false">cell,bluetooth,wifi,nfc,wimax</string>

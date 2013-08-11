@@ -148,6 +148,10 @@ public class AudioService extends IAudioService.Stub {
     private Object mSettingsLock = new Object();
     private boolean mMediaServerOk;
 
+    private static final String MAIN_MIC_CHOICE = "omap.audio.mic.main";
+    private static final String SUB_MIC_CHOICE = "omap.audio.mic.sub";
+    private static final String EXTDISP_STATUS_DISPLAY = "com.motorola.intent.action.EXTDISP_STATUS_DISPLAY";
+
     private SoundPool mSoundPool;
     private Object mSoundEffectsLock = new Object();
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
@@ -180,16 +184,17 @@ public class AudioService extends IAudioService.Stub {
 
    /** @hide Maximum volume index values for audio streams */
     private int[] MAX_STREAM_VOLUME = new int[] {
-        5,  // STREAM_VOICE_CALL
+        10, // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
         7,  // STREAM_RING
-        15, // STREAM_MUSIC
+        30, // STREAM_MUSIC
         7,  // STREAM_ALARM
         7,  // STREAM_NOTIFICATION
         15, // STREAM_BLUETOOTH_SCO
         7,  // STREAM_SYSTEM_ENFORCED
         15, // STREAM_DTMF
-        15  // STREAM_TTS
+        15, // STREAM_TTS
+        15  // STREAM_FM
     };
     /* STREAM_VOLUME_ALIAS[] indicates for each stream if it uses the volume settings
      * of another stream: This avoids multiplying the volume settings for hidden
@@ -205,7 +210,8 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.STREAM_BLUETOOTH_SCO, // STREAM_BLUETOOTH_SCO
         AudioSystem.STREAM_SYSTEM,  // STREAM_SYSTEM_ENFORCED
         AudioSystem.STREAM_VOICE_CALL, // STREAM_DTMF
-        AudioSystem.STREAM_MUSIC  // STREAM_TTS
+        AudioSystem.STREAM_MUSIC, // STREAM_TTS
+        AudioSystem.STREAM_FM
     };
 
     private static final String[] STREAM_VOLUME_HEADSET_SETTINGS = new String[] {
@@ -396,6 +402,8 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        // See if this works as in GB to fix hdmi audio out
+        intentFilter.addAction(EXTDISP_STATUS_DISPLAY);
         context.registerReceiver(mReceiver, intentFilter);
 
         // Register for package removal intent broadcasts for media button receiver persistence
@@ -2379,7 +2387,6 @@ public class AudioService extends IAudioService.Stub {
                     mRingerModeAffectedStreams = ringerModeAffectedStreams;
                     setRingerModeInt(getRingerMode(), false);
                 }
-                
                 boolean linkNotificationWithVolume = Settings.System.getInt(mContentResolver,
                         Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
                 if (linkNotificationWithVolume) {
@@ -2684,6 +2691,23 @@ public class AudioService extends IAudioService.Stub {
                         mConnectedDevices.put(
                                 new Integer(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET), "");
                     }
+                }
+            } else if (action.equals(EXTDISP_STATUS_DISPLAY)) {
+            	Log.v(TAG,"Broadcast Receiver: Got action EXTDISP_STATUS_DISPLAY");
+                boolean audio = intent.getBooleanExtra("audio", false);
+                boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_HDMI);
+                if (!audio && isConnected) {
+                    Log.v(TAG,"Broadcast Receiver: For HDMI Audio State = 0 && isConnected = TRUE");
+                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HDMI,
+                            AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                            "");
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_HDMI);
+                } else if ((audio != true) || isConnected)  {
+                    Log.v(TAG,"Broadcast Receiver: For HDMI Audio State = 0 && isConnected = FALSE");
+                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HDMI,
+                            AudioSystem.DEVICE_STATE_AVAILABLE,
+                            "");
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_HDMI), "");
                 }
             } else if (action.equals(Intent.ACTION_HDMI_AUDIO_PLUG)) {
                 int state = intent.getIntExtra("state", 0);

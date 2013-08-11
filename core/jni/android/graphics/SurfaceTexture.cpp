@@ -258,10 +258,6 @@ static jstring SurfaceTexture_getMetadata(JNIEnv *env, jobject thiz)
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeClassInit",          "()V",   (void*)SurfaceTexture_classInit },
-#ifndef OMAP_ENHANCEMENT
-#warning Using OMAP_ENHANCEMENT version of nativeInit to avoid ABI mismatch. \
-         Original:(ILjava/lang/Object;Z) New:(ILjava/lang/Object;ZI)
-#endif
     {"nativeInit",               "(ILjava/lang/Object;ZI)V", (void*)SurfaceTexture_init },
     {"nativeFinalize",           "()V",   (void*)SurfaceTexture_finalize },
     {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },

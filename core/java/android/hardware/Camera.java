@@ -34,7 +34,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import android.text.TextUtils;
+import java.util.StringTokenizer;
 
 
 /**
@@ -1683,8 +1683,7 @@ public class Coordinate {
         private static final String KEY_SMOOTH_ZOOM_SUPPORTED = "smooth-zoom-supported";
         private static final String KEY_FOCUS_DISTANCES = "focus-distances";
         private static final String KEY_VIDEO_SIZE = "video-size";
-        private static final String KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO =
-                                            "preferred-preview-size-for-video";
+        private static final String KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO = "preferred-preview-size-for-video";
         private static final String KEY_MAX_NUM_DETECTED_FACES_HW = "max-num-detected-faces-hw";
         private static final String KEY_MAX_NUM_DETECTED_FACES_SW = "max-num-detected-faces-sw";
         private static final String KEY_RECORDING_HINT = "recording-hint";
@@ -2170,9 +2169,9 @@ public class Coordinate {
         public void unflatten(String flattened) {
             mMap.clear();
 
-            TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(';');
-            splitter.setString(flattened);
-            for (String kv : splitter) {
+            StringTokenizer tokenizer = new StringTokenizer(flattened, ";");
+            while (tokenizer.hasMoreElements()) {
+                String kv = tokenizer.nextToken();
                 int pos = kv.indexOf('=');
                 if (pos == -1) {
                     continue;
@@ -4441,11 +4440,11 @@ public class Coordinate {
         private ArrayList<String> split(String str) {
             if (str == null) return null;
 
-            TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
-            splitter.setString(str);
+            // Use StringTokenizer because it is faster than split.
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
             ArrayList<String> substrings = new ArrayList<String>();
-            for (String s : splitter) {
-                substrings.add(s);
+            while (tokenizer.hasMoreElements()) {
+                substrings.add(tokenizer.nextToken());
             }
             return substrings;
         }
@@ -4455,11 +4454,11 @@ public class Coordinate {
         private ArrayList<Integer> splitInt(String str) {
             if (str == null) return null;
 
-            TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
-            splitter.setString(str);
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
             ArrayList<Integer> substrings = new ArrayList<Integer>();
-            for (String s : splitter) {
-                substrings.add(Integer.parseInt(s));
+            while (tokenizer.hasMoreElements()) {
+                String token = tokenizer.nextToken();
+                substrings.add(Integer.parseInt(token));
             }
             if (substrings.size() == 0) return null;
             return substrings;
@@ -4468,11 +4467,11 @@ public class Coordinate {
         private void splitInt(String str, int[] output) {
             if (str == null) return;
 
-            TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
-            splitter.setString(str);
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
             int index = 0;
-            for (String s : splitter) {
-                output[index++] = Integer.parseInt(s);
+            while (tokenizer.hasMoreElements()) {
+                String token = tokenizer.nextToken();
+                output[index++] = Integer.parseInt(token);
             }
         }
 
@@ -4480,11 +4479,11 @@ public class Coordinate {
         private void splitFloat(String str, float[] output) {
             if (str == null) return;
 
-            TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
-            splitter.setString(str);
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
             int index = 0;
-            for (String s : splitter) {
-                output[index++] = Float.parseFloat(s);
+            while (tokenizer.hasMoreElements()) {
+                String token = tokenizer.nextToken();
+                output[index++] = Float.parseFloat(token);
             }
         }
 
@@ -4511,11 +4510,10 @@ public class Coordinate {
         private ArrayList<Size> splitSize(String str) {
             if (str == null) return null;
 
-            TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
-            splitter.setString(str);
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
             ArrayList<Size> sizeList = new ArrayList<Size>();
-            for (String s : splitter) {
-                Size size = strToSize(s);
+            while (tokenizer.hasMoreElements()) {
+                Size size = strToSize(tokenizer.nextToken());
                 if (size != null) sizeList.add(size);
             }
             if (sizeList.size() == 0) return null;
@@ -4599,16 +4597,15 @@ public class Coordinate {
             return result;
         }
 
-// Splits a comma delimited string to an ArrayList of Coordinate.
+	// Splits a comma delimited string to an ArrayList of Coordinate.
         // Return null if the passing string is null or the Coordinate is 0.
         private ArrayList<Coordinate> splitCoordinate(String str) {
             if (str == null) return null;
 
-            TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
-            splitter.setString(str);
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
             ArrayList<Coordinate> coordinateList = new ArrayList<Coordinate>();
-            for (String s : splitter) {
-                Coordinate c = strToCoordinate(s);
+            while (tokenizer.hasMoreElements()) {
+                Coordinate c = strToCoordinate(tokenizer.nextToken());
                 if (c != null) coordinateList.add(c);
             }
             if (coordinateList.size() == 0) return null;

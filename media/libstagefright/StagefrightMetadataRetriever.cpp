@@ -422,9 +422,6 @@ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
                 &mClient, trackMeta, source, OMXCodec::kPreferSoftwareCodecs,
                 timeUs, option);
 #endif
-#ifdef QCOM_HARDWARE
-    }
-#endif
 
 #if defined(TARGET8x60) || !defined(QCOM_HARDWARE)
     if (frame == NULL) {

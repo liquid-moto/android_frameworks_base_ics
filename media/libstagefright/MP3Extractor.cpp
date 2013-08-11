@@ -333,8 +333,9 @@ MP3Extractor::MP3Extractor(
         if (mDataSource->getSize(&fileSize) == OK) {
             durationUs = 8000LL * (fileSize - mFirstFramePos) / bitrate;
 #ifdef OMAP_ENHANCEMENT
-            if (mSeeker != NULL)
+            if (mSeeker != NULL) {
                 mSeeker->updateDuration(&durationUs);
+            }
 #endif
         } else {
             durationUs = -1;

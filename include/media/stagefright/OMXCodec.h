@@ -380,6 +380,11 @@ private:
         kAvoidMemcopyInputRecordingFrames     = 2048,
         kRequiresLargerEncoderOutputBuffer    = 4096,
         kOutputBuffersAreUnreadable           = 8192,
+#ifdef QCOM_HARDWARE
+        kStoreMetaDataInInputVideoBuffers     = 16384,
+        kRequiresGlobalFlush                  = 0x20000000, // 2^29
+        kRequiresWMAProComponent              = 0x40000000, //2^30
+#endif
     };
 
     enum BufferStatus {

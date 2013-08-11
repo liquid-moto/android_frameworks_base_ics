@@ -562,6 +562,9 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             if (mPixelFormat != 1 && mPixelFormat != 4 && mPixelFormat != 5) {
                 LOGV("dequeueBuffer: non standard pixel format: %d.", mPixelFormat);
             }
+#ifdef QCOM_HARDWARE
+            checkBuffer((native_handle_t *)graphicBuffer->handle, mReqSize, usage);
+#endif
             mSlots[buf].mGraphicBuffer = graphicBuffer;
             mSlots[buf].mRequestBufferCalled = false;
             mSlots[buf].mFence = EGL_NO_SYNC_KHR;
@@ -824,6 +827,13 @@ status_t SurfaceTexture::connect(int api,
                         mConnectedApi, api);
                 err = -EINVAL;
             } else {
+#ifdef QCOM_HARDWARE
+                memcpy(mCurrentTransformMatrix, mtxIdentity,
+                        sizeof(mCurrentTransformMatrix));
+                mNextBufferInfo.width = 0;
+                mNextBufferInfo.height = 0;
+                mNextBufferInfo.format = 0;
+#endif
                 mConnectedApi = api;
                 *outWidth = mDefaultWidth;
                 *outHeight = mDefaultHeight;

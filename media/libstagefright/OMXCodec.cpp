@@ -614,7 +614,15 @@ uint32_t OMXCodec::getComponentQuirks(
         quirks |= kRequiresAllocateBufferOnOutputPorts;
         quirks |= kDefersOutputBufferAllocation;
     }
-
+    if (!strcmp(componentName, "OMX.TI.Video.Decoder") ||
+            !strcmp(componentName, "OMX.TI.720P.Decoder")) {
+        // TI Video Decoder and TI 720p Decoder must use buffers allocated
+        // by Overlay for output port. So, I cannot call OMX_AllocateBuffer
+        // on output port. I must use OMX_UseBuffer on input port to ensure
+        // 128 byte alignment.
+        quirks |= kRequiresAllocateBufferOnInputPorts;
+        quirks |= kInputBufferSizesAreBogus;
+    }
     if (!strcmp(componentName, "OMX.TI.DUCATI1.VIDEO.DECODER")) {
         quirks |= kRequiresAllocateBufferOnInputPorts;
         quirks |= kRequiresAllocateBufferOnOutputPorts;
@@ -814,6 +822,22 @@ sp<MediaSource> OMXCodec::Create(
            {
               componentName= "OMX.qcom.audio.decoder.wmaLossLess";
            }
+        }
+#endif
+
+#ifdef OMAP_COMPAT
+        if (!strcmp(componentName, "OMX.TI.Video.Decoder")) {
+            int32_t width, height;
+            bool success = meta->findInt32(kKeyWidth, &width);
+            success = success && meta->findInt32(kKeyHeight, &height);
+            CHECK(success);
+            // We need this for 720p video without AVC profile
+            // Not a good solution, but ..
+            if (width*height > 412800) {  //860*480
+               componentName = "OMX.TI.720P.Decoder";
+               LOGE("Format exceed the decoder's capabilities. %d", width*height);
+               continue;
+            }
         }
 #endif
 
@@ -1296,8 +1320,8 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
                          &paramDivX, sizeof(paramDivX));
         if (err!=OK) {
             return err;
-        }
 #endif
+
 #ifdef OMAP_ENHANCEMENT
         } else if (meta->findData(kKeyHdr, &type, &data, &size)) {
             CODEC_LOGV("Codec specific information of size %d", size);
@@ -1351,8 +1375,8 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
             }
         }
 #endif
-        }
 #endif
+        }
     }
 
     int32_t bitRate = 0;
@@ -2285,11 +2309,12 @@ status_t OMXCodec::setupAVCEncoderParameters(const sp<MetaData>& meta) {
         h264type.nBFrames = 1;
         h264type.nPFrames = h264type.nPFrames / 2;
         mNumBFrames = 1;
-#endif
 #ifdef OMAP_ENHANCEMENT
-    //When flag kOnlySubmitOneInputBufferAtOneTime is enabled, B frames must not be used.
-    if (mFlags & kOnlySubmitOneInputBufferAtOneTime) {
-        h264type.nBFrames = 0;
+        //When flag kOnlySubmitOneInputBufferAtOneTime is enabled, B frames must not be used.
+        if (mFlags & kOnlySubmitOneInputBufferAtOneTime) {
+            h264type.nBFrames = 0;
+        }
+#endif
     }
 #endif
 
@@ -2394,6 +2419,10 @@ status_t OMXCodec::setVideoOutputFormat(
                || format.eColorFormat == OMX_COLOR_FormatYUV420SemiPlanar
                || format.eColorFormat == OMX_COLOR_FormatCbYCrY
                || format.eColorFormat == OMX_TI_COLOR_FormatYUV420PackedSemiPlanar
+               || format.eColorFormat == OMX_QCOM_COLOR_FormatYVU420SemiPlanar
+#ifdef QCOM_HARDWARE
+               || format.eColorFormat == QOMX_COLOR_FormatYUV420PackedSemiPlanar64x32Tile2m8ka
+#endif
 #ifdef SAMSUNG_CODEC_SUPPORT
                || format.eColorFormat == OMX_SEC_COLOR_FormatNV12TPhysicalAddress
                || format.eColorFormat == OMX_SEC_COLOR_FormatNV12Tiled
@@ -2575,8 +2604,8 @@ void OMXCodec::setComponentRole(
 #ifdef QCOM_HARDWARE
         { MEDIA_MIMETYPE_VIDEO_DIVX,
             "video_decoder.divx", NULL },
-        { MEDIA_MIMETYPE_AUDIO_AC3,
-            "audio_decoder.ac3", NULL },
+//        { MEDIA_MIMETYPE_AUDIO_AC3,
+//            "audio_decoder.ac3", NULL },
         { MEDIA_MIMETYPE_VIDEO_DIVX311,
             "video_decoder.divx", NULL },
 #endif
@@ -4655,17 +4684,17 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
                             + srcBuffer->range_offset(),
                         srcBuffer->range_length());
 #else
-            if (tmpBuffer != srcBuffer) {
-                memcpy((uint8_t *)info->mData + offset,
-                     (const uint8_t *)srcBuffer->data()
-                    + srcBuffer->range_offset(),
-                     srcBuffer->range_length());
-                if (tmpBuffer) {
-                    tmpBuffer->release();
+                if (tmpBuffer != srcBuffer) {
+                    memcpy((uint8_t *)info->mData + offset,
+                        (const uint8_t *)srcBuffer->data()
+                            + srcBuffer->range_offset(),
+                         srcBuffer->range_length());
+                    if (tmpBuffer) {
+                        tmpBuffer->release();
+                    }
                 }
-            }
 #endif // OMAP_ENHANCEMENT
-#else
+#else // SAMSUNG_CODEC_SUPPORT
                 OMX_PARAM_PORTDEFINITIONTYPE def;
                 InitOMXParams(&def);
                 def.nPortIndex = kPortIndexInput;
@@ -5925,6 +5954,20 @@ static const char *colorFormatString(OMX_COLOR_FORMATTYPE type) {
     if (type == OMX_TI_COLOR_FormatYUV420PackedSemiPlanar) {
         return "OMX_TI_COLOR_FormatYUV420PackedSemiPlanar";
 	}
+#ifdef SAMSUNG_CODEC_SUPPORT
+    if (type == OMX_SEC_COLOR_FormatNV12TPhysicalAddress) {
+        return "OMX_SEC_COLOR_FormatNV12TPhysicalAddress";
+    }
+    if (type == OMX_SEC_COLOR_FormatNV12LPhysicalAddress) {
+        return "OMX_SEC_COLOR_FormatNV12LPhysicalAddress";
+    }
+    if (type == OMX_SEC_COLOR_FormatNV12LVirtualAddress) {
+        return "OMX_SEC_COLOR_FormatNV12LVirtualAddress";
+    }
+    if (type == OMX_SEC_COLOR_FormatNV12Tiled) {
+        return "OMX_SEC_COLOR_FormatNV12Tiled";
+    }
+#endif
     else if (type == OMX_QCOM_COLOR_FormatYVU420SemiPlanar) {
         return "OMX_QCOM_COLOR_FormatYVU420SemiPlanar";
 #ifdef QCOM_HARDWARE
@@ -6383,7 +6426,8 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                 mOutputFormat->setCString(
                         kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG2);
             } else if (video_def->eCompressionFormat == OMX_VIDEO_CodingWMV) {
-                mOutputFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_WMV);
+                mOutputFormat->setCString(
+                        kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_WMV);
 #endif
             } else {
                 CHECK(!"Unknown compression format.");
@@ -6622,28 +6666,25 @@ status_t QueryCodecs(
                 break;
             }
 
-	    CodecProfileLevel profileLevel;
+	        CodecProfileLevel profileLevel;
 #if defined(OMAP_ENHANCEMENT) && defined(TARGET_OMAP3)
             if (!strcmp(componentName, "OMX.TI.Video.Decoder")) {
- 	        //OMX defined profile levels for Baselevel (OMX_VIDEO_AVCProfileBaseline = 0x1 don't match Anddroid's definition for base profile
+ 	            //OMX defined profile levels for Baselevel (OMX_VIDEO_AVCProfileBaseline = 0x1 don't match Android's definition for base profile
                 //kAVCProfileBaseline = 0x42. TI 36xx decoder support only base profile and level 31
-		profileLevel.mProfile = kAVCProfileBaseline;
-	    }	
-	    
+		        profileLevel.mProfile = kAVCProfileBaseline;
+	        }	
             if(!strcmp(componentName, "OMX.TI.720P.Decoder")) {
-		switch(param.eProfile)
-		{
-		    case OMX_VIDEO_AVCProfileBaseline:
-			profileLevel.mProfile = kAVCProfileBaseline;
-			break;
-
-		    default:
-			LOGE("QueryCodecs:unsupported profile:%d",param.eProfile);
-			break;
-		}
-	    }
+		        switch(param.eProfile) {
+		            case OMX_VIDEO_AVCProfileBaseline:
+			            profileLevel.mProfile = kAVCProfileBaseline;
+			            break;
+		            default:
+			            LOGE("QueryCodecs:unsupported profile:%d",param.eProfile);
+			            break;
+		        }
+	        }
 #else
-	    profileLevel.mProfile = param.eProfile;
+	        profileLevel.mProfile = param.eProfile;
 #endif
             profileLevel.mLevel = param.eLevel;
 
@@ -6653,7 +6694,7 @@ status_t QueryCodecs(
         // Color format query
         OMX_VIDEO_PARAM_PORTFORMATTYPE portFormat;
 #if defined(OMAP_ENHANCEMENT) && defined(TARGET_OMAP3)
-	int16_t nIndex = 0;
+	    int16_t nIndex = 0;
 #endif
         InitOMXParams(&portFormat);
         portFormat.nPortIndex = queryDecoders ? 1 : 0;

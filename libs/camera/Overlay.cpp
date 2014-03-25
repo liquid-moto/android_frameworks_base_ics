@@ -172,8 +172,12 @@ status_t Overlay::queueBuffer(overlay_buffer_t buffer)
     pthread_mutex_lock(&mQueueMutex);
 
     if (mNumFreeBuffers < NUM_BUFFERS) {
-        mNumFreeBuffers++;
-        mQueued[index] = true;
+        if (mQueued[index]) {
+            LOGW("%s: The buffer was already in queue", __FUNCTION__);
+        } else {
+            mNumFreeBuffers++;
+            mQueued[index] = true;
+        }
         rv = NO_ERROR;
     } else {
         LOGW("%s: Attempt to queue more buffers than we have", __FUNCTION__);
@@ -244,9 +248,16 @@ void Overlay::destroy()
     for (uint32_t i = 0; i < NUM_BUFFERS; i++) {
         if (mBuffers[i].ptr != NULL && munmap(mBuffers[i].ptr, mBuffers[i].length) < 0) {
             LOGW("%s: unmap of buffer %d failed", __FUNCTION__, i);
+        } else {
+            mBuffers[i].ptr = NULL;
         }
         if (mBuffers[i].fd > 0) {
+            if (fd > 0 && fd != mBuffers[i].fd) {
+                LOGD("%s: multiple fd detected, closing fd %d...", __FUNCTION__, fd);
+                close(fd);
+            }
             fd = mBuffers[i].fd;
+            mBuffers[i].fd = 0;
         }
     }
     if (fd > 0) {

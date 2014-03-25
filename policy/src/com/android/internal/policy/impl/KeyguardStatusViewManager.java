@@ -85,6 +85,7 @@ class KeyguardStatusViewManager implements OnClickListener {
     private static final int OWNER_INFO = 14;
     private static final int BATTERY_INFO = 15;
     private static final int COLOR_WHITE = 0xFFFFFFFF;
+    private static final int COLOR_RED = 0xFFFF0000;
 
     private StatusMode mStatus;
     private String mDateFormatString;
@@ -110,7 +111,7 @@ class KeyguardStatusViewManager implements OnClickListener {
 
     // are we showing battery information?
     private boolean mShowingBatteryInfo = false;
-    
+
     private boolean mLockAlwaysBattery;
 
     // last known plugged in state
@@ -701,7 +702,7 @@ class KeyguardStatusViewManager implements OnClickListener {
         if (mStatus1View != null) {
             MutableInt icon = new MutableInt(0);
             CharSequence string = getPriorityTextMessage(icon);
-            mStatus1View.setText(string);
+			mStatus1View.setText(string);
             mStatus1View.setCompoundDrawablesWithIntrinsicBounds(icon.value, 0, 0, 0);
             mStatus1View.setVisibility(mShowingStatus ? View.VISIBLE : View.INVISIBLE);
         }
@@ -735,9 +736,11 @@ class KeyguardStatusViewManager implements OnClickListener {
                 if (mBatteryLevel < KeyguardUpdateMonitor.LOW_BATTERY_THRESHOLD) {
                     // Battery is low
                     string = getContext().getString(R.string.lockscreen_low_battery);
+					// Red font
+					mStatus1View.setTextColor(COLOR_RED);
                     icon.value = BATTERY_LOW_ICON;
                     if (mLockAlwaysBattery) {
-                        // Show battery at low percent	
+                        // Show battery at low percent
                         string = getContext().getString(R.string.lockscreen_always_battery,
                                 mBatteryLevel);
                         icon.value = BATTERY_LOW_ICON;
@@ -911,16 +914,16 @@ class KeyguardStatusViewManager implements OnClickListener {
                 }
                 break;
         }
-        
+
         String customLabel = null;
         customLabel = Settings.System.getString(getContext().getContentResolver(),
                 Settings.System.CUSTOM_CARRIER_LABEL);
-        
-        if(customLabel == null)        
+
+        if(customLabel == null)
             setCarrierText(carrierText);
         else
             setCarrierText(customLabel);
-        
+
         setCarrierHelpText(carrierHelpTextId);
         updateEmergencyCallButtonState(mPhoneState);
     }
@@ -1109,15 +1112,16 @@ class KeyguardStatusViewManager implements OnClickListener {
         // date view
         try {
             mDateView.setTextColor(color);
-            if (DEBUG) Log.d(TAG, String.format("Setting mDateView DATE text color to %d", color));
+            if (DEBUG) Log.d(TAG, String.format("Setting mDateView text color to %d", color));
         } catch (NullPointerException ne) {
             if (DEBUG) ne.printStackTrace();
         }
 
         // status view
+
         try {
             mStatus1View.setTextColor(color);
-            if (DEBUG) Log.d(TAG, String.format("Setting mStatus1View DATE text color to %d", color));
+            if (DEBUG) Log.d(TAG, String.format("Setting mStatus1View text color to %d", color));
         } catch (NullPointerException ne) {
             if (DEBUG) ne.printStackTrace();
         }
@@ -1125,7 +1129,7 @@ class KeyguardStatusViewManager implements OnClickListener {
         // owner info view
         try {
             mOwnerInfoView.setTextColor(color);
-            if (DEBUG) Log.d(TAG, String.format("Setting mOwnerInfoView DATE text color to %d", color));
+            if (DEBUG) Log.d(TAG, String.format("Setting mOwnerInfoView text color to %d", color));
         } catch (NullPointerException ne) {
             if (DEBUG) ne.printStackTrace();
         }
@@ -1133,7 +1137,7 @@ class KeyguardStatusViewManager implements OnClickListener {
         // alarm status view
         try {
             mAlarmStatusView.setTextColor(color);
-            if (DEBUG) Log.d(TAG, String.format("Setting mAlarmStatusView DATE text color to %d", color));
+            if (DEBUG) Log.d(TAG, String.format("Setting mAlarmStatusView text color to %d", color));
         } catch (NullPointerException ne) {
             if (DEBUG) ne.printStackTrace();
         }
@@ -1147,7 +1151,7 @@ class KeyguardStatusViewManager implements OnClickListener {
             mWeatherTemp.setTextColor(color);
             mWeatherUpdateTime.setTextColor(color);
             // drawable
-            mWeatherImage.setColorFilter(color);
+            //mWeatherImage.setColorFilter(color);
         } catch (NullPointerException npe) {
             if (DEBUG) Log.d(TAG, "Failed to update weather colors", npe);
         }

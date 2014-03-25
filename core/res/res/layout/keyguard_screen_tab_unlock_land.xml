@@ -46,6 +46,8 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="6dip"
             android:textColor="@color/lockscreen_clock_background"
+            android:shadowColor="@color/lockscreen_shadow"
+            android:shadowRadius="2.0"
             />
 
         <TextView android:id="@+id/timeDisplayForeground"
@@ -57,6 +59,8 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="6dip"
             android:textColor="@color/lockscreen_clock_foreground"
+            android:shadowColor="@color/lockscreen_shadow"
+            android:shadowRadius="2.0"
             android:layout_alignLeft="@id/timeDisplayBackground"
             android:layout_alignTop="@id/timeDisplayBackground"
             />
@@ -73,6 +77,9 @@
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+		android:textAllCaps="true"
+        android:shadowColor="@color/lockscreen_shadow"
+        android:shadowRadius="2.0"
         />
 
     <TextView
@@ -82,6 +89,8 @@
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+        android:shadowColor="@color/lockscreen_shadow"
+        android:shadowRadius="2.0"
         android:drawablePadding="4dip"
         android:layout_marginTop="4dip"
         android:layout_gravity="right"
@@ -97,6 +106,8 @@
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+        android:shadowColor="@color/lockscreen_shadow"
+        android:shadowRadius="2.0"
         android:drawablePadding="4dip"
         />
 
@@ -136,7 +147,9 @@
                 android:gravity="right"
                 android:singleLine="true"
                 android:ellipsize="marquee"
-                android:textColor="?android:attr/textColorPrimary"/>
+                android:textColor="?android:attr/textColorPrimary"
+                android:shadowColor="@color/lockscreen_shadow"
+                android:shadowRadius="2.0" />
 
             <TextView
                 android:id="@+id/weather_condition"
@@ -148,7 +161,9 @@
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:textSize="12sp"
-                android:textColor="?android:attr/textColorPrimary" />
+                android:textColor="?android:attr/textColorPrimary"
+                android:shadowColor="@color/lockscreen_shadow"
+                android:shadowRadius="2.0" />
 
             <TextView
                 android:id="@+id/update_time"
@@ -158,7 +173,9 @@
                 android:layout_alignParentRight="true"
                 android:gravity="right"
                 android:textSize="6sp"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textColor="?android:attr/textColorSecondary"
+                android:shadowColor="@color/lockscreen_shadow"
+                android:shadowRadius="2.0" />
 
         </RelativeLayout>
 
@@ -176,7 +193,9 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:textSize="20sp"
-                android:textColor="?android:attr/textColorPrimary" />
+                android:textColor="?android:attr/textColorPrimary"
+                android:shadowColor="@color/lockscreen_shadow"
+                android:shadowRadius="2.0" />
 
             <View
                 android:id="@+id/weather_divider"
@@ -193,7 +212,9 @@
                 android:layout_centerHorizontal="true"
                 android:paddingTop="2dip"
                 android:textSize="12sp"
-                android:textColor="?android:attr/textColorPrimary" />
+                android:textColor="?android:attr/textColorPrimary"
+                android:shadowColor="@color/lockscreen_shadow"
+                android:shadowRadius="2.0" />
 
         </RelativeLayout>
 
@@ -212,6 +233,8 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:textColor="?android:attr/textColorSecondary"
+        android:shadowColor="@color/lockscreen_shadow"
+        android:shadowRadius="2.0"
         />
 
     <Button

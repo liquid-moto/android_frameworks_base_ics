@@ -45,6 +45,10 @@ public:
     static const char *keyFormat;
     static const char *keyChannels;
     static const char *keyFrameCount;
+#ifdef HAVE_FM_RADIO
+    static const char *keyFmOn;
+    static const char *keyFmOff;
+#endif
     static const char *keyInputSource;
 
     String8 toString();

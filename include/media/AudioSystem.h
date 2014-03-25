@@ -197,9 +197,12 @@ public:
         size_t* buffSize);
 
     static status_t setVoiceVolume(float volume);
+#ifdef HAVE_FM_RADIO
+    static status_t setFmVolume(float volume);
+#endif
 
     // return the number of audio frames written by AudioFlinger to audio HAL and
-    // audio dsp to DAC since the output on which the specified stream is playing
+    // audio dsp to DAC since the output on which the specificed stream is playing
     // has exited standby.
     // returned status (from utils/Errors.h) can be:
     // - NO_ERROR: successful operation, halFrames and dspFrames point to valid data
@@ -250,6 +253,7 @@ public:
     //
     static status_t setDeviceConnectionState(audio_devices_t device, audio_policy_dev_state_t state, const char *device_address);
     static audio_policy_dev_state_t getDeviceConnectionState(audio_devices_t device, const char *device_address);
+
     static status_t setPhoneState(int state);
     static status_t setRingerMode(uint32_t mode, uint32_t mask);
     static status_t setForceUse(audio_policy_force_use_t usage, audio_policy_forced_cfg_t config);
@@ -310,18 +314,16 @@ public:
     static uint32_t popCount(uint32_t u);
     static bool isOutputDevice(audio_devices device);
     static bool isInputDevice(audio_devices device);
+    static bool isA2dpDevice(audio_devices device);
 #ifdef HAVE_FM_RADIO
     static bool isFmDevice(audio_devices device);
 #endif
-    static bool isA2dpDevice(audio_devices device);
     static bool isBluetoothScoDevice(audio_devices device);
     static bool isLowVisibility(stream_type stream);
-    static bool isInputChannel(uint32_t channel);
     static bool isOutputChannel(uint32_t channel);
+    static bool isInputChannel(uint32_t channel);
     static bool isValidFormat(uint32_t format);
     static bool isLinearPCM(uint32_t format);
-    static status_t setDeviceConnectionState(audio_devices device, device_connection_state state, const char *device_address);
-    static device_connection_state getDeviceConnectionState(audio_devices device, const char *device_address);
 #endif
 
     // ----------------------------------------------------------------------------

@@ -184,10 +184,10 @@ public class AudioService extends IAudioService.Stub {
 
    /** @hide Maximum volume index values for audio streams */
     private int[] MAX_STREAM_VOLUME = new int[] {
-        10, // STREAM_VOICE_CALL
+        5,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
         7,  // STREAM_RING
-        30, // STREAM_MUSIC
+        15, // STREAM_MUSIC
         7,  // STREAM_ALARM
         7,  // STREAM_NOTIFICATION
         15, // STREAM_BLUETOOTH_SCO
@@ -211,7 +211,7 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.STREAM_SYSTEM,  // STREAM_SYSTEM_ENFORCED
         AudioSystem.STREAM_VOICE_CALL, // STREAM_DTMF
         AudioSystem.STREAM_MUSIC, // STREAM_TTS
-        AudioSystem.STREAM_FM
+        AudioSystem.STREAM_MUSIC  // STREAM_FM
     };
 
     private static final String[] STREAM_VOLUME_HEADSET_SETTINGS = new String[] {
@@ -2692,23 +2692,6 @@ public class AudioService extends IAudioService.Stub {
                                 new Integer(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET), "");
                     }
                 }
-            } else if (action.equals(EXTDISP_STATUS_DISPLAY)) {
-            	Log.v(TAG,"Broadcast Receiver: Got action EXTDISP_STATUS_DISPLAY");
-                boolean audio = intent.getBooleanExtra("audio", false);
-                boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_HDMI);
-                if (!audio && isConnected) {
-                    Log.v(TAG,"Broadcast Receiver: For HDMI Audio State = 0 && isConnected = TRUE");
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HDMI,
-                            AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                            "");
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_HDMI);
-                } else if ((audio != true) || isConnected)  {
-                    Log.v(TAG,"Broadcast Receiver: For HDMI Audio State = 0 && isConnected = FALSE");
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HDMI,
-                            AudioSystem.DEVICE_STATE_AVAILABLE,
-                            "");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_HDMI), "");
-                }
             } else if (action.equals(Intent.ACTION_HDMI_AUDIO_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
                 Log.v(TAG, "Broadcast Receiver: Got ACTION_HDMI_AUDIO_PLUG, state = "+state);
@@ -2726,6 +2709,23 @@ public class AudioService extends IAudioService.Stub {
                                                              "");
                         mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_AUX_DIGITAL), "");
                     }
+                }
+            } else if (action.equals(EXTDISP_STATUS_DISPLAY)) {
+                Log.v(TAG,"Broadcast Receiver: Got action EXTDISP_STATUS_DISPLAY");
+                boolean audio = intent.getBooleanExtra("audio", false);
+                boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_HDMI);
+                if (!audio && isConnected) {
+                    Log.v(TAG,"Broadcast Receiver: For HDMI Audio State = 0 && isConnected = TRUE");
+                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HDMI,
+                            AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                            "");
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_HDMI);
+                } else if ((audio != true) || isConnected)  {
+                    Log.v(TAG,"Broadcast Receiver: For HDMI Audio State = 0 && isConnected = FALSE");
+                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HDMI,
+                            AudioSystem.DEVICE_STATE_AVAILABLE,
+                            "");
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_HDMI), "");
                 }
             } else if (action.equals(Intent.ACTION_USB_DGTL_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);

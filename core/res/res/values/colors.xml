@@ -111,6 +111,7 @@
     <color name="lockscreen_clock_foreground">#ffffffff</color>
     <color name="lockscreen_clock_am_pm">#ffffffff</color>
     <color name="lockscreen_owner_info">#ff9a9a9a</color>
+    <color name="lockscreen_shadow">#dd000000</color>
 
     <!-- FaceLock -->
     <color name="facelock_color_background">#000000</color>

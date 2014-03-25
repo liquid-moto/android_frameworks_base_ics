@@ -2637,6 +2637,8 @@ public class PhoneStatusBar extends StatusBar {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUSBAR_UNEXPANDED_COLOR), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUSBAR_UNEXPANDED_ALPHA), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUSBAR_WINDOWSHADE_USER_BACKGROUND), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUSBAR_WINDOWSHADE_HANDLE_IMAGE), false, this);
@@ -2781,6 +2783,15 @@ public class PhoneStatusBar extends StatusBar {
             mPowerWidget.setBackgroundColor(newStatusbarColor);
         } catch (SettingNotFoundException snfe) {
             if (DEBUG) Log.d(TAG, "Unexpanded statusbar color preference not detected");
+        }
+
+        // unexpanded statusbar alpha quality
+        try {
+            float statusbarUnexAlpha = Settings.System.getFloat(cr, Settings.System.STATUSBAR_UNEXPANDED_ALPHA);
+            mStatusbarUnexpanded.setAlpha(statusbarUnexAlpha);
+            if (DEBUG) Log.d(TAG, String.format("Statusbar alpha preference detected: %f", statusbarUnexAlpha));
+        } catch (SettingNotFoundException snfe) {
+            if (DEBUG) Log.d(TAG, "Statusbar alpha preference not detected");
         }
 
         // NavigationBar background color

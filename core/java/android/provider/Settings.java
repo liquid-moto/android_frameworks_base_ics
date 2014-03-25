@@ -3051,6 +3051,12 @@ public final class Settings {
         public static final String STATUSBAR_UNEXPANDED_COLOR = "statusbar_unexpanded_color";
 
         /**
+         * unexpanded statusbar alpha
+         *@hide
+         */
+        public static final String STATUSBAR_UNEXPANDED_ALPHA = "statusbar_unexpanded_alpha";
+
+        /**
          * unexpanded statusbar notification icons visibility
          * @hide
          */
